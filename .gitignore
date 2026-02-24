@@ -1,14 +1,3 @@
-#informations sensibles
-.env
-#logs
-logs/
-#node_modules
 node_modules/
-#dist
-dist/
-#build
-build/
-#cache
-cache/
-#temp
-temp/
+.env
+*.log
