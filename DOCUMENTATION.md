@@ -1,3 +1,42 @@
+# pepper-primary
+
+## Rôle
+Expose le pepper primaire utilisé par `Auth-service` pour le calcul sécurisé des hashes de mot de passe.
+
+## Mise à jour 2026-03
+- Service strictement interne (aucun appel frontend).
+- Doit rester accessible uniquement dans le réseau backend Docker/local.
+
+## Port et santé
+- Port par défaut: `3098`
+- Healthcheck: `GET /health`
+
+## Variables d'environnement (canoniques)
+- `PORT`
+- `SERVICE_KEY`
+- `PEPPER_VALUE`
+
+## Routes
+- `GET /pepper` (protégée par header `X-Service-Key`)
+- `GET /health`
+
+## Sécurité
+- Vérification `X-Service-Key` via comparaison timing-safe (`SHA-256` + `timingSafeEqual`)
+- `PEPPER_VALUE` doit rester uniquement en environnement (jamais hardcodé)
+
+## Dépendances
+- Aucune dépendance DB
+- Utilisé par `Auth-service`
+
+## Démarrage
+- Local: `npm start`
+- Docker: via `docker compose --env-file .env.docker up --build`
+
+## Secrets & configuration
+- **Fichier source** : `pepper-primary/.env` (non versionné par Git).
+- **Copie locale de référence** : `Secrets-Danebcys/pepper-primary/.env`, synchronisée depuis la racine du monorepo avec `.\scripts\sync-secrets-danebcys.ps1` (PowerShell).
+- Ne jamais committer les valeurs sensibles.
+
 # Pepper Primary — Documentation technique
 
 > Microservice de fourniture du **pepper primaire** pour le hashage des mots de passe dans **DANEBCYS**.  
