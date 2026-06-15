@@ -1,10 +1,11 @@
 {
   "name": "pepper-primary",
-  "version": "1.0.0",
-  "description": "Microservice interne — fournit le pepper primaire",
+  "version": "1.1.0",
+  "description": "Microservice interne — fournit le pepper primaire au Auth-service",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7"

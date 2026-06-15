@@ -1,46 +1,27 @@
-require('dotenv').config();
-const http = require('http');
-const crypto = require('crypto');
+// Microservice pepper-primary — fournit le pepper primaire pour le hashage des mots de passe
+// Auth-service appelle GET /pepper avec X-Service-Key. Aucun appel sortant, pepper en mémoire.
 
-const PORT = process.env.PORT || 3098;
+require('dotenv').config();
+const { createPepperServer } = require('./lib/pepperServer');
+
+// Port d'écoute (défaut 3098)
+const PORT = parseInt(process.env.PORT, 10) || 3098;
+// Clé inter-service attendue dans X-Service-Key
 const SERVICE_KEY = process.env.SERVICE_KEY;
+// Valeur du pepper primaire
 const PEPPER_VALUE = process.env.PEPPER_VALUE;
 
 if (!SERVICE_KEY || !PEPPER_VALUE) {
-  console.error('[Pepper Primary] SERVICE_KEY et PEPPER_VALUE requis dans .env');
+  console.error('[pepper-primary] SERVICE_KEY et PEPPER_VALUE sont requis (.env / environnement)');
   process.exit(1);
 }
 
-function safeCompare(a, b) {
-  const hashA = crypto.createHash('sha256').update(String(a)).digest();
-  const hashB = crypto.createHash('sha256').update(String(b)).digest();
-  return crypto.timingSafeEqual(hashA, hashB);
-}
-
-const server = http.createServer((req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-
-  if (req.method === 'GET' && req.url === '/pepper') {
-    const key = req.headers['x-service-key'];
-
-    if (!key || !safeCompare(key, SERVICE_KEY)) {
-      res.writeHead(403);
-      return res.end(JSON.stringify({ error: 'Forbidden' }));
-    }
-
-    res.writeHead(200);
-    return res.end(JSON.stringify({ pepper: PEPPER_VALUE }));
-  }
-
-  if (req.method === 'GET' && req.url === '/health') {
-    res.writeHead(200);
-    return res.end(JSON.stringify({ status: 'ok', service: 'pepper-primary' }));
-  }
-
-  res.writeHead(404);
-  res.end(JSON.stringify({ error: 'Not Found' }));
+const server = createPepperServer({
+  serviceName: 'pepper-primary',
+  serviceKey: SERVICE_KEY,
+  pepperValue: PEPPER_VALUE
 });
 
 server.listen(PORT, () => {
-  console.log(`[Pepper Primary] Port ${PORT}`);
+  console.log(`[pepper-primary] Écoute sur le port ${PORT}`);
 });
